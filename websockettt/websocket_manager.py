@@ -6,6 +6,7 @@ from websocket import WebSocketApp
 
 # TODO: Replace print statements with logging.
 
+
 class WebsocketManager:
     _CONNECT_TIMEOUT_S = 5
 
@@ -79,7 +80,7 @@ class WebsocketManager:
             while not self.ws:
                 self._connect()
                 if self.ws:
-                    print(f"Websocket connected to endpoint: {self._get_url()}")
+                    print(f"WEBSOCKET CONNECTED")
                     return
 
     def _on_close(self, ws: WebSocketApp, code, raw_msg) -> None:
