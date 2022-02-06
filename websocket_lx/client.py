@@ -43,7 +43,7 @@ class LxWebsocketClient(WebsocketManager):
         bid_size = message['bid_size']
         ask = message['ask']
         ask_size = message['ask_size']
-        self._book_tops[contract_id] = [bid, bid_size, ask, ask_size]
+        self._book_tops[contract_id] = [bid / 100, bid_size, ask / 100, ask_size]  # convert from cents to usd
         self._orderbook_timestamps[contract_id] = time.time()
 
     def _on_message(self, ws, raw_message: str) -> None:
