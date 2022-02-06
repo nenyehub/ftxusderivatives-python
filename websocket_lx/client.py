@@ -3,7 +3,7 @@ from collections import defaultdict
 from typing import DefaultDict, List, Dict, Set
 import time
 
-from websockettt.websocket_manager import WebsocketManager
+from websocket_lx.websocket_manager import WebsocketManager
 
 
 class LxWebsocketClient(WebsocketManager):
@@ -12,7 +12,7 @@ class LxWebsocketClient(WebsocketManager):
     def __init__(self, api_key: str = None) -> None:
         super().__init__()
         self._api_key = api_key
-        self._book_tops: DefaultDict[int, List[int]] = defaultdict(lambda: [0, 0, 0, 0])
+        self._book_tops: DefaultDict[int, List[float]] = defaultdict(lambda: [0, 0, 0, 0])
         self._reset_data()
 
     def _on_open(self, ws):
@@ -27,9 +27,11 @@ class LxWebsocketClient(WebsocketManager):
         return self._ENDPOINT + f"?token={self._api_key}"
 
     def subscribe(self, contract_id: int) -> None:
+        """Subscribe to ticker information for a given contract."""
         self._subscriptions.add(contract_id)
 
     def unsubscribe(self, contract_id: int) -> None:
+        """Unsubscribe from ticker information for a given contract."""
         self._subscriptions.remove(contract_id)
 
     def book_top(self, contract_id: int) -> List[int]:
