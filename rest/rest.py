@@ -36,7 +36,8 @@ class LxClient:
     def _sign_request(self, request: Request) -> None:
         """Includes API Key in request headers."""
         prepared = request.prepare()  # TODO: investigate req prepare
-        request.headers['Authorization'] = f'JWT {self._api_key}'
+        if self._api_key:
+            request.headers['Authorization'] = f'JWT {self._api_key}'
 
     def _process_response(self, response: Response) -> Any:
         try:

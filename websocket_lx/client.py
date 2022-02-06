@@ -24,7 +24,10 @@ class LxWebsocketClient(WebsocketManager):
         self._orderbook_timestamps.clear()
 
     def _get_url(self) -> str:
-        return self._ENDPOINT + f"?token={self._api_key}"
+        if self._api_key:
+            return self._ENDPOINT + f"?token={self._api_key}"
+        else:
+            return self._ENDPOINT
 
     def subscribe(self, contract_id: int) -> None:
         """Subscribe to ticker information for a given contract."""
