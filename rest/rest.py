@@ -3,17 +3,24 @@ LedgerX REST Client.
 """
 
 from typing import Optional, Dict, Any
-from requests import Request, Session, Response
-
+from requests import Request, Session
+from requests.exceptions import HTTPError, Timeout
+import logging
+from logging import Logger
+import time
+import json
 
 class LxClient:
     _ENDPOINT = "https://api.ledgerx.com/"
     _TRADE_ENDPOINT = "https://trade.ledgerx.com/api/"
 
     def __init__(self, api_key=None) -> None:
-        """Initializes LedgerX client with API key and http session."""
-        self._session = Session()
-        self._api_key = api_key
+        """Initializes LedgerX client with API key, http session, and logger."""
+        self._session: Session = Session()
+        self._api_key: str = api_key
+        self._logger: Logger = logging.getLogger('root')  # TODO: Integrate this with setup_custom_logger
+        self._retries = 0
+        self._MAX_RETRIES = 3
 
     def _get(self, path: str, use_trade_api: bool = False, params: Optional[Dict[str, Any]] = None) -> Any:
         return self._request('GET', path, use_trade_api, params=params)
@@ -24,29 +31,105 @@ class LxClient:
     def _delete(self, path: str, use_trade_api: bool = False, params: Optional[Dict[str, Any]] = None) -> Any:
         return self._request('DELETE', path, use_trade_api, json=params)
 
-    def _request(self, method: str, path: str, use_trade_api: bool, **kwargs) -> Any:
-        endpoint = self._ENDPOINT
-        if use_trade_api:
-            endpoint = self._TRADE_ENDPOINT
-        request = Request(method, endpoint + path, **kwargs)
-        self._sign_request(request)
-        response = self._session.send(request.prepare())  # TODO: investigate req prepare
-        return self._process_response(response)
-
     def _sign_request(self, request: Request) -> None:
         """Includes API Key in request headers."""
         prepared = request.prepare()  # TODO: investigate req prepare
         if self._api_key:
             request.headers['Authorization'] = f'JWT {self._api_key}'
 
-    def _process_response(self, response: Response) -> Any:
+    def _request(self, method: str, path: str, use_trade_api: bool, **kwargs) -> Any:
+        endpoint = self._ENDPOINT
+        if use_trade_api:
+            endpoint = self._TRADE_ENDPOINT
+        url = endpoint + path
+        request = Request(method, url, **kwargs)
+        self._sign_request(request)
+        prepared = request.prepare()
+        response = self._session.send(prepared)
+
+        # Request retry function.
+        def retry():
+            self._retries += 1
+            if self._retries > self._MAX_RETRIES:
+                raise Exception("Max retries on %s hit, raising. \n" % path +
+                                "Request Parameters: % s \n" % json.dumps(kwargs) +
+                                "Full url: %s" % url)
+            else:
+                return self._request(method, path, use_trade_api, **kwargs)
+
+        # Response error-handling
         try:
-            data = response.json()
-        except ValueError:
+            # Make non-200s throw
             response.raise_for_status()
-            raise  # TODO: investigate raise
-        else:
-            return data  # return successful query response
+
+        except HTTPError as e:
+            # 400 - Bad Request.
+            if response.status_code == 400:
+                self._logger.error("400 bad request.")
+                error = response.json()['error']
+
+                if error == 'INVALID_TOKEN':
+                    self._logger.error("API key incorrect or expired. Please check and restart.")
+                    self._logger.error("Error: " + response.text)
+
+                exit(1)
+
+            # 401 - Unauthorized.
+            if response.status_code == 401:
+                self._logger.error("API Key unauthorized to perform the requested action.")
+                self._logger.error("Error: " + response.text)
+                exit(1)
+
+            # 404 - Not Found.
+            elif response.status_code == 404:
+                self._logger.error("Unable to contact the LedgerX API (404)" +
+                                   "Request: %s" % url)
+                exit(1)
+
+            # 429, Too Many Requests (ratelimit). Cancel orders & wait until rate limit reset.
+            elif response.status_code == 429:
+                self._logger.error("Ratelimited on current request. Sleeping, then trying again. " +
+                                   "Try fewer order pairs. " +
+                                   "Request: %s" % url)
+
+                # Figure out how long we need to wait.
+                sleep_time = int(response.headers['Retry-After'])  # seconds to wait.
+
+                # Cancel orders.
+                self._logger.warning("Canceling all orders.")
+                self.cancel_all_orders()
+
+                self._logger.error("Ratelimit will reset in %d seconds. Sleeping for %d seconds." % (sleep_time,
+                                                                                                     sleep_time))
+                time.sleep(sleep_time)
+
+                # Retry the request
+                return retry()
+
+            # 503 - Service Unavailable. LedgerX temporary downtime.
+            elif response.status_code == 503:
+                self._logger.warning("Unable to contact the LedgerX API (503), retrying in 3 seconds. " +
+                                     "Request: %s" % url)
+                time.sleep(3)
+                return retry()
+
+            # If we haven't returned or re-raised yet, we get here.
+            self._logger.error("Unhandled Error: %s: %s" % (e, response.text))
+            self._logger.error("Endpoint was (%s)\n" % method +
+                               "path was (%s):\n" % path +
+                               "Request Parameters: %s" % json.dumps(kwargs))
+            exit(1)
+
+        except Timeout as e:
+            # Timeout, re-run this request
+            self._logger.warning("Timed out on request: %s" % url +
+                                 "Keyword args: % s" % json.dumps(kwargs))
+
+        # Reset retry counter on success
+        self._retries = 0
+
+        return response.json()
+
 
     # REST API Functions
 

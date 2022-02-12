@@ -4,6 +4,9 @@ An unofficial Python wrapper for the [REST API](https://docs.ledgerx.com/referen
 ## Features
 - Implementation of all REST endpoints, detailed [here](https://docs.ledgerx.com/reference/overview)
 - Simple handling of authentication
+- Error handling
+- Request retry logic
+- Logging implementation
 
 ## Quick Start
 [Register an account with FTX US Derivatives.](https://derivs.ftx.us/)
