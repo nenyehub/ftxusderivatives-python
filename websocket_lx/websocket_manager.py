@@ -1,6 +1,8 @@
 import json
 import time
 from threading import Thread, Lock
+import logging
+from logging import Logger
 
 from websocket import WebSocketApp
 
@@ -13,6 +15,7 @@ class WebsocketManager:
     def __init__(self):
         self.connect_lock = Lock()
         self.ws = None
+        self._logger: Logger = logging.getLogger('root')  # TODO: Integrate this with setup_custom_logger
 
     def _get_url(self):
         raise NotImplementedError()
@@ -47,7 +50,7 @@ class WebsocketManager:
             if time.time() - ts > self._CONNECT_TIMEOUT_S:
                 self.ws = None
                 return
-            time.sleep(6.1)  # TODO: 10 requests per minute limit. add logic to not spam connection, error 429
+            time.sleep(1)  # TODO: add logic to respect ratelimiting
 
     def _wrap_callback(self, f):
         def wrapped_f(ws, *args, **kwargs):
@@ -80,12 +83,12 @@ class WebsocketManager:
             while not self.ws:
                 self._connect()
                 if self.ws:
-                    print(f"WEBSOCKET CONNECTED")
+                    self._logger.info("WEBSOCKET CONNECTED.")
                     return
 
     def _on_close(self, ws: WebSocketApp, code, raw_msg) -> None:
-        print(f"CONNECTION CLOSED: Code: {code}, Msg: {raw_msg}")
-        print(f"RECONNECTING...")
+        self._logger.debug(f"CONNECTION CLOSED: Code: {code}, Msg: {raw_msg}")
+        self._logger.debug("RECONNECTING...")
         self._reconnect(ws)
 
     def _on_error(self, ws: WebSocketApp, error) -> None:  # TODO: Add type hint for 'error'...

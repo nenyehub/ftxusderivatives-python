@@ -22,6 +22,7 @@ class LxWebsocketClient(WebsocketManager):
         self._subscriptions: Set[int] = set()
         self._orderbook_timestamps: DefaultDict[int, float] = defaultdict(float)
         self._orderbook_timestamps.clear()
+        self._book_tops.clear()
 
     def _get_url(self) -> str:
         if self._api_key:
@@ -37,7 +38,7 @@ class LxWebsocketClient(WebsocketManager):
         """Unsubscribe from ticker information for a given contract."""
         self._subscriptions.remove(contract_id)
 
-    def book_top(self, contract_id: int) -> List[int]:
+    def book_top(self, contract_id: int) -> List[float]:
         return self._book_tops[contract_id]
 
     def _handle_book_top_message(self, message: Dict) -> None:

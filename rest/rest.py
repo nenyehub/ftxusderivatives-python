@@ -10,6 +10,7 @@ from logging import Logger
 import time
 import json
 
+
 class LxClient:
     _ENDPOINT = "https://api.ledgerx.com/"
     _TRADE_ENDPOINT = "https://trade.ledgerx.com/api/"
@@ -22,6 +23,10 @@ class LxClient:
         self._retries = 0
         self._MAX_RETRIES = 3
 
+    ############################################
+    # HTTP Requests and Error Handling
+    ############################################
+
     def _get(self, path: str, use_trade_api: bool = False, params: Optional[Dict[str, Any]] = None) -> Any:
         return self._request('GET', path, use_trade_api, params=params)
 
@@ -33,7 +38,6 @@ class LxClient:
 
     def _sign_request(self, request: Request) -> None:
         """Includes API Key in request headers."""
-        prepared = request.prepare()  # TODO: investigate req prepare
         if self._api_key:
             request.headers['Authorization'] = f'JWT {self._api_key}'
 
@@ -130,8 +134,9 @@ class LxClient:
 
         return response.json()
 
-
+    ############################################
     # REST API Functions
+    ############################################
 
     def list_contracts(self, params: Optional[Dict[str, Any]] = None) -> dict:
         """Returns a list of contracts.
