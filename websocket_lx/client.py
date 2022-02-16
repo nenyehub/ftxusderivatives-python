@@ -31,11 +31,13 @@ class LxWebsocketClient(WebsocketManager):
             return self._ENDPOINT
 
     def subscribe(self, contract_id: int) -> None:
-        """Subscribe to ticker information for a given contract."""
+        """Subscribe to orderbook tops for a given contract."""
+        self._logger.info(f"Subscribed to orderbook top for contract_id: {contract_id}")
         self._subscriptions.add(contract_id)
 
     def unsubscribe(self, contract_id: int) -> None:
-        """Unsubscribe from ticker information for a given contract."""
+        """Unsubscribe from orderbook tops for a given contract."""
+        self._logger.info(f"Unsubscribed from orderbook tops for contract_id: {contract_id}")
         self._subscriptions.remove(contract_id)
 
     def book_top(self, contract_id: int) -> List[float]:
