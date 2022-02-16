@@ -3,10 +3,11 @@ An unofficial Python wrapper for the [REST API](https://docs.ledgerx.com/referen
 
 ## Features
 - Implementation of all REST endpoints, detailed [here](https://docs.ledgerx.com/reference/overview)
+- WebSocket implementation, supports orderbook tops  
 - Simple handling of authentication
-- Error handling
-- Request retry logic
-- Logging implementation
+- HTTP request error handling
+- HTTP request retry logic
+- Logging support
 
 ## Quick Start
 [Register an account with FTX US Derivatives.](https://derivs.ftx.us/)
@@ -19,27 +20,54 @@ To run unit tests, enter your API key in the test file: `tests/test_rest_api.py`
 
 Here's some example code to get started with. 
 ```python
+###############################
+# REST API Example
+###############################
 from rest.rest import LxClient
 
-api_key = ""  # Put API key here
-client = LxClient(api_key)
+api_key = ""  # TODO: Put API key here
 
-# list active swap contracts
-swaps = client.list_contracts({  
-	'active': True,  
+# Init REST client
+client = LxClient(api_key=api_key)
+
+# list active day-ahead-swap contracts
+swaps = client.list_contracts({
+	'active': True,
 	'derivative_type': 'day_ahead_swap',
 })
 
-# grab BTC next-day-swap contract ID
-data = swaps['data']  
-cbtc_swap = filter(lambda data: data['underlying_asset'] == 'CBTC', data)  
+# grab BTC day-ahead-swap contract ID
+data = swaps['data']
+cbtc_swap = filter(lambda data: data['underlying_asset'] == 'CBTC', data)
 contract_id = next(cbtc_swap)['id']
+print(f"BTC swap contract_id: {contract_id}")
 
-# retrieve your position for a given contract
+# retrieve your position for BTC day-ahead-swap contract
 position = client.retrieve_contract_position(contract_id)
+print(f"BTC swap position: {position}")
 
-# get contract ticker
+# get BTC day-ahead-swap contract ticker
 ticker = client.get_contract_ticker(contract_id)
+print(f"BTC swap ticker: {ticker}")
+
+###############################
+# WebSocket Example
+###############################
+from websocket_lx.client import LxWebsocketClient
+import time
+
+# Init WebSocket client
+ws = LxWebsocketClient(api_key=api_key)
+
+# Subscribe to orderbook-top feed for BTC day-ahead-swap contract
+ws.subscribe(contract_id=contract_id)
+ws.connect()
+
+# Grab orderbook-top for BTC day-ahead-swap once a second
+while True:
+    top = ws.book_top(contract_id=contract_id)
+    print(top)
+    time.sleep(1)
 ```
 ## Under Development
  - WebSocket support w/ orderbook state machine 
