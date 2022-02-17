@@ -3,10 +3,9 @@ An unofficial Python wrapper for the [REST API](https://docs.ledgerx.com/referen
 
 ## Features
 - Implementation of all REST endpoints, detailed [here](https://docs.ledgerx.com/reference/overview)
-- WebSocket implementation, supports orderbook tops  
+- WebSocket implementation: live orderbook tops, account balances, and open positions info
 - Simple handling of authentication
-- HTTP request error handling
-- HTTP request retry logic
+- HTTP request error handling and retry logic
 - Logging support
 
 ## Quick Start

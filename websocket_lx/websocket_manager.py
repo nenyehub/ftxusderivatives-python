@@ -83,12 +83,12 @@ class WebsocketManager:
             while not self.ws:
                 self._connect()
                 if self.ws:
-                    self._logger.info("WEBSOCKET CONNECTED.")
+                    self._logger.info("LedgerX: WebSocket connected.")
                     return
 
     def _on_close(self, ws: WebSocketApp, code, raw_msg) -> None:
-        self._logger.debug(f"CONNECTION CLOSED: Code: {code}, Msg: {raw_msg}")
-        self._logger.debug("RECONNECTING...")
+        self._logger.debug(f"LedgerX: WebSocket connection closed: Code: {code}, Msg: {raw_msg}")
+        self._logger.debug("LedgerX: WebSocket reconnecting...")
         self._reconnect(ws)
 
     def _on_error(self, ws: WebSocketApp, error) -> None:  # TODO: Add type hint for 'error'...
