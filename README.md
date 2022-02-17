@@ -1,5 +1,5 @@
 # ftxusderivatives-python
-An unofficial Python wrapper for the [REST API](https://docs.ledgerx.com/reference/overview) of FTX US Derivatives, formerly known as LedgerX. I have no affiliation with FTX US Derivatives. Use this at your own risk.
+An unofficial Python wrapper for the [REST and WebSocket APIs](https://docs.ledgerx.com/reference/overview) of FTX US Derivatives, formerly known as LedgerX. I have no affiliation with FTX US Derivatives. Use this at your own risk.
 
 ## Features
 - Implementation of all REST endpoints, detailed [here](https://docs.ledgerx.com/reference/overview)
