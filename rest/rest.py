@@ -380,3 +380,7 @@ class LxClient:
                 200 Success, 400 Bad Request
         """
         return self._get(f'book-states/{contract_id}', use_trade_api=True)
+
+    def get_account_balances(self) -> None:
+        """Retrieves account balances. This is DEPRECATED, use WebSockets for account balance information instead."""
+        return self._get('balance', use_trade_api=True)
