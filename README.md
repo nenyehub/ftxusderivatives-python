@@ -70,8 +70,7 @@ while True:
     time.sleep(1)
 ```
 ## Under Development
- - WebSocket support w/ orderbook state machine 
- - Position PnL tracker
+ - Full orderbook state support using WebSockets 
 
 ## Contributing 
 Contributions, fixes, recommendations, and all other feedback is welcome. If you are fixing a bug, please open an issue first with all relevant details, and mention the issue number in the pull request.
