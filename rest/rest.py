@@ -76,6 +76,9 @@ class LxClient:
                     self._logger.error("API key incorrect or expired. Please check and restart.")
                     self._logger.error("Error: " + response.text)
 
+                else:
+                    self._logger.error("Error: " + response.text)
+
                 exit(1)
 
             # 401 - Unauthorized.
@@ -128,6 +131,9 @@ class LxClient:
             # Timeout, re-run this request
             self._logger.warning("Timed out on request: %s" % url +
                                  "Keyword args: % s" % json.dumps(kwargs))
+            return retry()
+
+        # TODO: add ConnectionError retry logic
 
         # Reset retry counter on success
         self._retries = 0
