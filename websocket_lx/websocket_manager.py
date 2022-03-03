@@ -11,6 +11,7 @@ from websocket import WebSocketApp
 
 class WebsocketManager:
     _CONNECT_TIMEOUT_S = 5
+    _ENDPOINT = None
 
     def __init__(self):
         self.connect_lock = Lock()
@@ -63,7 +64,7 @@ class WebsocketManager:
 
     def _run_websocket(self, ws: WebSocketApp) -> None:
         try:
-            ws.run_forever(ping_interval=25)
+            ws.run_forever(ping_interval=15)
         except Exception as e:
             raise Exception(f'Unexpected error while running websocket: {e}')
         finally:
@@ -83,16 +84,17 @@ class WebsocketManager:
             while not self.ws:
                 self._connect()
                 if self.ws:
-                    self._logger.info("LedgerX: WebSocket connected.")
+                    self._logger.info(f"Connection with URL: {self._ENDPOINT}")
                     return
 
     def _on_close(self, ws: WebSocketApp, code, raw_msg) -> None:
         self._logger.debug(f"LedgerX: WebSocket connection closed: Code: {code}, Msg: {raw_msg}")
         self._logger.debug("LedgerX: WebSocket reconnecting...")
-        self._reconnect(ws)
+        if code:
+            self._reconnect(ws)  # Only reconnect if there is an error code.
 
     def _on_error(self, ws: WebSocketApp, error) -> None:  # TODO: Add type hint for 'error'...
-        print(error)
+        self._logger.info(f"LedgerX: WebSocket Error: {error}")
         self._reconnect(ws)
 
     def reconnect(self) -> None:
