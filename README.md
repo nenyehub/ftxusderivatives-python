@@ -3,7 +3,7 @@ An unofficial Python wrapper for the [REST and WebSocket APIs](https://docs.ledg
 
 ## Features
 - Implementation of all REST endpoints, detailed [here](https://docs.ledgerx.com/reference/overview)
-- WebSocket implementation: live orderbook tops, account balances, and open positions info
+- WebSocket implementation: live orderbook tops, account balances, open positions info, server heartbeat, reconnect logic
 - Simple handling of authentication
 - HTTP request error handling and retry logic
 - Logging support
@@ -17,12 +17,13 @@ Clone the repository to your target directory.
 
 To run unit tests, enter your API key in the test file: `tests/test_rest_api.py`, and run `python -m pytest` in the project directory.
 
-Here's some example code to get started with. 
+Here's some example code to get started with.
+
 ```python
 ###############################
 # REST API Example
 ###############################
-from rest.rest import LxClient
+from rest_lx.rest import LxClient
 
 api_key = ""  # TODO: Put API key here
 
@@ -31,8 +32,8 @@ client = LxClient(api_key=api_key)
 
 # list active day-ahead-swap contracts
 swaps = client.list_contracts({
-	'active': True,
-	'derivative_type': 'day_ahead_swap',
+    'active': True,
+    'derivative_type': 'day_ahead_swap',
 })
 
 # grab BTC day-ahead-swap contract ID
