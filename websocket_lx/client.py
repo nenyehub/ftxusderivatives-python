@@ -24,6 +24,7 @@ class LxWebsocketClient(WebsocketManager):
         self._book_tops: DefaultDict[int, List[float]] = defaultdict(lambda: [0, 0, 0, 0])
         self._open_positions: DefaultDict[int, Dict[str, int]] = defaultdict(dict)
         self._account_balances: DefaultDict[str, Dict[str, float]] = defaultdict(dict)
+        self._last_heartbeat_timestamp: int = 0  # Nanosecond timestamp
 
         self._subscriptions.clear()
         self._orderbook_timestamps.clear()
@@ -47,9 +48,16 @@ class LxWebsocketClient(WebsocketManager):
         self._logger.info(f"LedgerX: Unsubscribed from orderbook tops for contract_id: {contract_id}")
         self._subscriptions.remove(contract_id)
 
+    def get_last_heartbeat_timestamp(self):
+        return self._last_heartbeat_timestamp
+
     def get_book_top(self, contract_id: int) -> List[float]:
         """Returns the best [bid, bid_size, ask, ask_size] for a given contract_id."""
         return self._book_tops[contract_id]
+
+    def get_book_timestamp(self, contract_id: int) -> float:
+        """Returns local-time timestamp of last orderbook update for a given contract."""
+        return self._orderbook_timestamps[contract_id]
 
     def get_open_position(self, contract_id: int) -> Dict:
         """Returns open position info for a given contract_id.
@@ -65,7 +73,7 @@ class LxWebsocketClient(WebsocketManager):
 
     def _handle_state_manifest_message(self, message: Dict) -> None:
         self._initial_open_order_count = message['state_manifest']['open_order_count']
-        self._logger.info(f"LedgerX: Open Orders: {self._initial_open_order_count}")
+        self._logger.debug(f"LedgerX: Open Orders: {self._initial_open_order_count}")
 
     def _handle_open_positions_update_message(self, message: Dict) -> None:
         for position in message['positions']:
@@ -93,6 +101,8 @@ class LxWebsocketClient(WebsocketManager):
                 }
             )
 
+        # TODO: Log account balances changed.
+
     def _handle_book_top_message(self, message: Dict) -> None:
         contract_id = message['contract_id']
         bid = message['bid']
@@ -101,6 +111,10 @@ class LxWebsocketClient(WebsocketManager):
         ask_size = message['ask_size']
         self._book_tops[contract_id] = [bid / 100, bid_size, ask / 100, ask_size]  # convert from cents to usd
         self._orderbook_timestamps[contract_id] = time.time()
+
+    def _handle_heartbeat_message(self, message: Dict) -> None:
+        """Records local-time of last received server heartbeat."""
+        self._last_heartbeat_timestamp = time.time_ns()
 
     def _on_message(self, ws, raw_message: str) -> None:
         message = json.loads(raw_message)
@@ -126,3 +140,6 @@ class LxWebsocketClient(WebsocketManager):
             if message['contract_id'] in self._subscriptions:
                 self._handle_book_top_message(message)
 
+        # Exchange heartbeat. Monitors exchange life.
+        if message_type == 'heartbeat':
+            self._handle_heartbeat_message(message)
