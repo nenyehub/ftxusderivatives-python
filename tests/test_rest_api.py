@@ -1,4 +1,4 @@
-from rest.rest import LxClient
+from rest_lx.rest import LxClient
 import pytest
 
 api_key = ""  # TODO: Put your API key here

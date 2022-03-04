@@ -2,7 +2,7 @@
 LedgerX REST Client.
 """
 
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Tuple
 from requests import Request, Session
 from requests.exceptions import HTTPError, Timeout
 import logging
@@ -79,7 +79,7 @@ class LxClient:
                 else:
                     self._logger.error("Error: " + response.text)
 
-                exit(1)
+                exit(1)  # TODO: Replace all exit(1) calls w/ Exception classes
 
             # 401 - Unauthorized.
             if response.status_code == 401:
@@ -390,3 +390,4 @@ class LxClient:
     def get_account_balances(self) -> None:
         """Retrieves account balances. This is DEPRECATED, use WebSockets for account balance information instead."""
         return self._get('balance', use_trade_api=True)
+
