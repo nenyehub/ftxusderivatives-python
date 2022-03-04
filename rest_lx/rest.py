@@ -2,7 +2,7 @@
 LedgerX REST Client.
 """
 
-from typing import Optional, Dict, Any, Tuple
+from typing import Optional, Dict, Any, Tuple, List
 from requests import Request, Session
 from requests.exceptions import HTTPError, Timeout
 import logging
@@ -417,3 +417,20 @@ class LxClient:
         })
         option = contract_info['data'][-1]
         return option['id'], option['strike_price'] / 100
+
+    def get_book_top_rest(self, contract_id: int) -> List[int]:
+        """Returns top of orderbook for a given contract_id. Uses REST endpoint."""
+        states = self.get_contract_orderbook_state(contract_id)
+        states = states['data']['book_states']
+        asks = list(filter(lambda x: x['is_ask'], states))
+        bids = list(filter(lambda x: not x['is_ask'], states))
+
+        low_ask = asks[-1]
+        top_bid = bids[0]
+
+        bid = top_bid['price']
+        bid_size = top_bid['size']
+
+        ask = low_ask['price']
+        ask_size = low_ask['size']
+        return [bid, bid_size, ask, ask_size]
