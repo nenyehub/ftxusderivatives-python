@@ -391,3 +391,29 @@ class LxClient:
         """Retrieves account balances. This is DEPRECATED, use WebSockets for account balance information instead."""
         return self._get('balance', use_trade_api=True)
 
+    ############################################
+    # Custom Functionality
+    ############################################
+
+    def get_swap_contract_id(self, asset: str) -> int:
+        """Returns the contract_id for the ETH or BTC next-day-swap contract"""
+        assert asset in ['CBTC', 'ETH']
+        contract_info = self.list_contracts({
+            'active': True,
+            'derivative_type': 'day_ahead_swap',
+            'asset': asset
+        })
+        swap = contract_info['data'][0]
+        return swap['id']
+
+    def get_closest_call(self, asset: str) -> Tuple[int, int]:
+        """Returns the contract_id and strike price for closest expiry ETH / BTC call option."""
+        assert asset in ['CBTC', 'ETH']
+        contract_info = self.list_contracts({
+            'active': True,
+            'contract_type': 'call',
+            'derivative_type': 'options_contract',
+            'asset': asset,
+        })
+        option = contract_info['data'][-1]
+        return option['id'], option['strike_price'] / 100
