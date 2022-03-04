@@ -51,7 +51,6 @@ class WebsocketManager:
             if time.time() - ts > self._CONNECT_TIMEOUT_S:
                 self.ws = None
                 return
-            time.sleep(1)  # TODO: add logic to respect ratelimiting
 
     def _wrap_callback(self, f):
         def wrapped_f(ws, *args, **kwargs):
@@ -68,7 +67,7 @@ class WebsocketManager:
         except Exception as e:
             raise Exception(f'Unexpected error while running websocket: {e}')
         finally:
-            self._reconnect(ws)
+            self._logger.debug("Error occurred. Function will return.")
 
     def _reconnect(self, ws: WebSocketApp) -> None:
         assert ws is not None, '_reconnect should only be called with an existing ws'
@@ -76,6 +75,10 @@ class WebsocketManager:
             self.ws = None
             ws.close()
             self.connect()
+
+    def close(self):
+        if self.ws:
+            self.ws.close()
 
     def connect(self) -> None:
         if self.ws:
@@ -89,12 +92,12 @@ class WebsocketManager:
 
     def _on_close(self, ws: WebSocketApp, code, raw_msg) -> None:
         self._logger.debug(f"LedgerX: WebSocket connection closed: Code: {code}, Msg: {raw_msg}")
-        self._logger.debug("LedgerX: WebSocket reconnecting...")
         if code:
+            self._logger.debug("LedgerX: WebSocket reconnecting...")
             self._reconnect(ws)  # Only reconnect if there is an error code.
 
     def _on_error(self, ws: WebSocketApp, error) -> None:  # TODO: Add type hint for 'error'...
-        self._logger.info(f"LedgerX: WebSocket Error: {error}")
+        self._logger.debug(f"LedgerX: WebSocket Error: {error}")
         self._reconnect(ws)
 
     def reconnect(self) -> None:
