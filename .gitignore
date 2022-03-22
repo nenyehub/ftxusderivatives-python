@@ -1,4 +1,18 @@
-.pytest_cache
-.idea
 dt_*.py
 *.pyc
+
+#IDE Files
+.idea/
+
+# notebook checkpoints
+.ipynb_checkpoints
+
+# python cache files
+*__pycache__*
+.pytest_cache
+
+# dist stuff
+build
+dist
+*.egg
+*.egg-info
