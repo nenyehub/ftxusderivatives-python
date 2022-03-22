@@ -13,11 +13,10 @@ An unofficial Python wrapper for the [REST and WebSocket APIs](https://docs.ledg
 
 [Generate an API key](https://docs.ledgerx.com/docs/api-key) and configure permissions.
 
-Clone the repository to your target directory. 
+Install ftxusderviatives-python: `pip install ftxusderivatives-python`
 
-To run unit tests, enter your API key in the test file: `tests/test_rest_api.py`, and run `python -m pytest` in the project directory.
-
-Here's some example code to get started with.
+Here's some example code to get started with. Note that API calls required authentication will not work if you do not
+enter your API key.
 
 ```python
 ###############################
