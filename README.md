@@ -9,9 +9,9 @@ An unofficial Python wrapper for the [REST and WebSocket APIs](https://docs.ledg
 - Logging support
 
 ## Quick Start
-[Register an account with FTX US Derivatives.](https://derivs.ftx.us/)
+[Register an account with FTX US Derivatives.](https://derivs.ftx.us/) *[optional]*
 
-[Generate an API key](https://docs.ledgerx.com/docs/api-key) and configure permissions.
+[Generate an API key](https://docs.ledgerx.com/docs/api-key) and configure permissions. *[optional]*
 
 Install ftxusderviatives-python: `pip install ftxusderivatives-python`
 
