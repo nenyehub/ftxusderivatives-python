@@ -13,20 +13,19 @@ class LxWebsocketClient(WebsocketManager):
         super().__init__()
         self._api_key = api_key
         self._initial_open_order_count = 0
+        self._last_heartbeat_timestamp: int = 0  # Nanosecond timestamp
+        self._subscriptions: Set[int] = set()  # Do not reset orderbook top subscriptions
         self._reset_data()
 
     def _on_open(self, ws):
         self._reset_data()
 
     def _reset_data(self) -> None:
-        self._subscriptions: Set[int] = set()
         self._orderbook_timestamps: DefaultDict[int, float] = defaultdict(float)
         self._book_tops: DefaultDict[int, List[float]] = defaultdict(lambda: [0, 0, 0, 0])
         self._open_positions: DefaultDict[int, Dict[str, int]] = defaultdict(dict)
         self._account_balances: DefaultDict[str, Dict[str, float]] = defaultdict(dict)
-        self._last_heartbeat_timestamp: int = 0  # Nanosecond timestamp
 
-        self._subscriptions.clear()
         self._orderbook_timestamps.clear()
         self._book_tops.clear()
         self._open_positions.clear()

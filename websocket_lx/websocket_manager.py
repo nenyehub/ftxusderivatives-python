@@ -65,7 +65,9 @@ class WebsocketManager:
         try:
             ws.run_forever(ping_interval=15)
         except Exception as e:
-            raise Exception(f'Unexpected error while running websocket: {e}')
+            # raise Exception(f'Unexpected error while running websocket: {e}')
+            self._logger.error(f'Unexpected error while running websocket: {e}')
+            self._reconnect()
         finally:
             self._logger.debug("Error occurred. Function will return.")
 
