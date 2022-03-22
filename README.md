@@ -23,7 +23,7 @@ Here's some example code to get started with.
 ###############################
 # REST API Example
 ###############################
-from rest_lx.rest import LxClient
+from src.rest_lx.rest import LxClient
 
 api_key = ""  # TODO: Put API key here
 
@@ -53,7 +53,7 @@ print(f"BTC swap ticker: {ticker}")
 ###############################
 # WebSocket Example
 ###############################
-from websocket_lx.client import LxWebsocketClient
+from src.websocket_lx.client import LxWebsocketClient
 import time
 
 # Init WebSocket client
@@ -65,7 +65,7 @@ ws.connect()
 
 # Grab orderbook-top for BTC day-ahead-swap once a second
 while True:
-    top = ws.book_top(contract_id=contract_id)
+    top = ws.get_book_top(contract_id=contract_id)
     print(top)
     time.sleep(1)
 ```
