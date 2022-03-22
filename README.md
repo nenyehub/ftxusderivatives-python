@@ -22,7 +22,7 @@ enter your API key.
 ###############################
 # REST API Example
 ###############################
-from src.rest_lx.rest import LxClient
+from rest_lx.rest import LxClient
 
 api_key = ""  # TODO: Put API key here
 
@@ -52,7 +52,7 @@ print(f"BTC swap ticker: {ticker}")
 ###############################
 # WebSocket Example
 ###############################
-from src.websocket_lx.client import LxWebsocketClient
+from websocket_lx.client import LxWebsocketClient
 import time
 
 # Init WebSocket client
