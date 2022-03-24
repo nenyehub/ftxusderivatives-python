@@ -15,7 +15,7 @@ An unofficial Python wrapper for the [REST and WebSocket APIs](https://docs.ledg
 
 Install ftxusderviatives-python: `pip install ftxusderivatives-python`
 
-Here's some example code to get started with. Note that API calls required authentication will not work if you do not
+Here's some example code to get started with. Note that API calls that require authentication will not work if you do not
 enter your API key.
 
 ```python
