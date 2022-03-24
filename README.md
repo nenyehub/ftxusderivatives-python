@@ -41,13 +41,25 @@ cbtc_swap = filter(lambda data: data['underlying_asset'] == 'CBTC', data)
 contract_id = next(cbtc_swap)['id']
 print(f"BTC swap contract_id: {contract_id}")
 
-# retrieve your position for BTC day-ahead-swap contract
+# retrieve your position for BTC day-ahead-swap contract (requires authentication)
 position = client.retrieve_contract_position(contract_id)
 print(f"BTC swap position: {position}")
 
-# get BTC day-ahead-swap contract ticker
-ticker = client.get_contract_ticker(contract_id)
-print(f"BTC swap ticker: {ticker}")
+# place bid for BTC next-day swap
+lx_buy = {
+    'order_type': 'limit',
+    'contract_id': contract_id,
+    'is_ask': False,
+    'swap_purpose': 'undisclosed',
+    'size': 1,
+    'price': 100,  # $1 (100 cents)
+    'volatile': True
+}
+order = client.create_order(**lx_buy)
+
+# cancel placed order
+message_id = order['data']['mid']  # order ID
+client.cancel_single_order(message_id=message_id, contract_id=contract_id)
 
 ###############################
 # WebSocket Example
