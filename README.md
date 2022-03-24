@@ -41,7 +41,7 @@ cbtc_swap = filter(lambda data: data['underlying_asset'] == 'CBTC', data)
 contract_id = next(cbtc_swap)['id']
 print(f"BTC swap contract_id: {contract_id}")
 
-# retrieve your position for BTC day-ahead-swap contract
+# retrieve your position for BTC day-ahead-swap contract (requires authentication)
 position = client.retrieve_contract_position(contract_id)
 print(f"BTC swap position: {position}")
 
