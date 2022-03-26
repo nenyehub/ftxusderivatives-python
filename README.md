@@ -3,7 +3,7 @@ An unofficial Python wrapper for the [REST and WebSocket APIs](https://docs.ledg
 
 ## Features
 - Implementation of all REST endpoints, detailed [here](https://docs.ledgerx.com/reference/overview)
-- WebSocket implementation: live orderbook tops, account balances, open positions info, server heartbeat, reconnect logic
+- WebSocket implementation: live orderbook tops, account balances, open positions info, order fills, server heartbeat, reconnect logic
 - Simple handling of authentication
 - HTTP request error handling and retry logic
 - Logging support
