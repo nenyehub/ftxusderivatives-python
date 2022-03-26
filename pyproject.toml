@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ftxusderivatives-python"
-version = "0.1.0"
+version = "0.1.1"
 description = "An unofficial Python wrapper for the REST and WebSocket APIs of FTX US Derivatives, formerly known as LedgerX."
 authors = ["Nenye Ndili <nenye@ndili.net>"]
 license = "MIT"
