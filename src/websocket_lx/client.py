@@ -15,6 +15,7 @@ class LxWebsocketClient(WebsocketManager):
         self._initial_open_order_count = 0
         self._last_heartbeat_timestamp: int = 0  # Nanosecond timestamp
         self._subscriptions: Set[int] = set()  # Do not reset orderbook top subscriptions
+        self._fills: DefaultDict[str, int] = defaultdict(int)  # {message_id: filled_size}
         self._reset_data()
 
     def _on_open(self, ws):
@@ -42,6 +43,11 @@ class LxWebsocketClient(WebsocketManager):
         self._logger.info(f"LedgerX: Subscribed to orderbook top for contract_id: {contract_id}")
         self._subscriptions.add(contract_id)
 
+    def subscribe_fills(self, message_id: str) -> None:
+        """Subscribe to order fills for a given message_id."""
+        self._logger.info(f"LedgerX: Subscribed to order fills for message_id: {message_id}")
+        self._fills[message_id] = 0
+
     def unsubscribe(self, contract_id: int) -> None:
         """Unsubscribe from orderbook tops for a given contract."""
         self._logger.info(f"LedgerX: Unsubscribed from orderbook tops for contract_id: {contract_id}")
@@ -63,6 +69,12 @@ class LxWebsocketClient(WebsocketManager):
         https://docs.ledgerx.com/reference/market-data-feed#open_positions_update
         """
         return self._open_positions[contract_id]
+
+    def get_filled_size(self, message_id: str) -> int:
+        """Gets filled size for a given message_id. Make sure to subscribe_fills first.
+        https://docs.ledgerx.com/reference/market-data-feed
+        """
+        return self._fills[message_id]
 
     def get_account_balances(self) -> Dict:
         """Returns account balances.
@@ -87,9 +99,9 @@ class LxWebsocketClient(WebsocketManager):
             if symbol == 'USD':
                 return value / 100
             elif symbol in ['BTC', 'CBTC']:
-                return value / 10**8
+                return value / 10 ** 8
             elif symbol == 'ETH':
-                return value / 10**9
+                return value / 10 ** 9
 
         # Convert currency units to USD, BTC, and ETH and update account balances.
         balances = message['collateral']
@@ -114,6 +126,11 @@ class LxWebsocketClient(WebsocketManager):
     def _handle_heartbeat_message(self, message: Dict) -> None:
         """Records local-time of last received server heartbeat."""
         self._last_heartbeat_timestamp = time.time_ns()
+
+    def _handle_fills_message(self, message: Dict) -> None:
+        """Records amount filled for an order."""
+        if 'filled_size' in message:
+            self._fills[message['mid']] = message['filled_size']
 
     def _on_message(self, ws, raw_message: str) -> None:
         message = json.loads(raw_message)
@@ -142,3 +159,7 @@ class LxWebsocketClient(WebsocketManager):
         # Exchange heartbeat. Monitors exchange life.
         if message_type == 'heartbeat':
             self._handle_heartbeat_message(message)
+
+        if message_type == 'action_report':
+            if message['mid'] in self._fills:
+                self._handle_fills_message(message)
