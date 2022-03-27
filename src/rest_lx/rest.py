@@ -395,8 +395,8 @@ class LxClient:
     # Custom Functionality
     ############################################
 
-    def get_swap_contract_id(self, asset: str) -> int:
-        """Returns the contract_id for the ETH or BTC next-day-swap contract"""
+    def get_swap_contract_info(self, asset: str) -> Dict:
+        """Returns the contract info for the ETH or BTC next-day-swap contract."""
         assert asset in ['CBTC', 'ETH']
         contract_info = self.list_contracts({
             'active': True,
@@ -404,7 +404,11 @@ class LxClient:
             'asset': asset
         })
         swap = contract_info['data'][0]
-        return swap['id']
+        return swap
+
+    def get_swap_contract_id(self, asset: str) -> int:
+        """Returns the contract_id for the ETH or BTC next-day-swap contract."""
+        return self.get_swap_contract_info(asset)['id']
 
     def get_closest_call(self, asset: str) -> Tuple[int, int]:
         """Returns the contract_id and strike price for closest expiry ETH / BTC call option."""
